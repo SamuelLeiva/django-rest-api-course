@@ -14,6 +14,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'my_discount'
         ]
     
-    def get_my_discount(self, obj):
+    def get_my_discount(self, obj): #se reflejará en el campo de my_discount
         print(obj.id)
-        return obj.get_discount()
+        return obj.get_discount() #llama al metodo del model
