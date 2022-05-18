@@ -15,8 +15,8 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
     
     def get_my_discount(self, obj): #se reflejará en el campo de my_discount
-        if obj.hasattr(obj, 'id'):
+        if hasattr(obj, 'id'):
             return None
-        if not isinstance(onj, Product):
+        if not isinstance(obj, Product):
             return None
         return obj.get_discount() #llama al metodo del model
