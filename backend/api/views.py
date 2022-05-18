@@ -6,12 +6,15 @@ from rest_framework.response import Response
 from products.models import Product
 from products.serializers import ProductSerializer
 
-@api_view(["GET"]) #allowed Methods
+@api_view(["POST"]) #allowed Methods
 def api_home(request, *args, **kwargs):
-    """ DRF API View """
-    instance = Product.objects.all().order_by("?").first()
-    data = {}
-    if instance:
-        # data = model_to_dict(instance, fields=['id', 'title', 'price', 'sale_price'])
-        data = ProductSerializer(instance).data
-    return Response(data)
+    """ 
+    DRF API View 
+    """
+    serializer = ProductSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True): # muestra mensaje si el serializer no es valido
+        instance = serializer.save()
+        print(instance)
+        # instance = form.save() // otra forma usando forms
+        return Response(serializer.data)
+    return Response({"invalid": "No good data"}, status=400)
