@@ -1,4 +1,5 @@
-from rest_framework import generics
+from tkinter import N
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -8,9 +9,81 @@ from yaml import serialize
 from .models import Product
 from .serializers import ProductSerializer
 
-class ProductListCreateAPIView(generics.ListCreateAPIView):
+# class ProductListCreateAPIView(generics.ListCreateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+
+#     def perform_create(self, serializer): # modificar la creacion
+#         # serializer.save(user=self.request.user)
+#         print(serializer.validated_data)
+#         title = serializer.validated_data.get('title')
+#         content = serializer.validated_data.get('content') or None
+#         if content is None:
+#             content = title
+#         serializer.save(content = content)
+#         # send a django signal (revisar curso anterior)
+
+# product_create_view = ProductListCreateAPIView.as_view()
+
+# class ProductDetailAPIView(generics.RetrieveAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     # lookup_filed = 'pk'
+
+# product_detail_view = ProductDetailAPIView.as_view()
+
+# class ProductUpdateAPIView(generics.UpdateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     lookup_filed = 'pk'
+
+#     def perform_update(self, serializer):
+#         instance = serializer.save()
+#         if not instance.content:
+#             instance.content = instance.title
+#             ## 
+
+# product_update_view = ProductUpdateAPIView.as_view()
+
+# class ProductDeleteAPIView(generics.DestroyAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     lookup_filed = 'pk'
+
+#     def perform_destroy(self, instance):
+#         # instance
+#         super().perform_destroy(instance)
+
+# product_delete_view = ProductDeleteAPIView.as_view()
+
+# class ProductListAPIView(generics.ListAPIView):
+#     """ 
+#     Not gonna use this method
+#     """
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+
+# product_list_view = ProductListAPIView.as_view()
+
+class ProductMixinView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    generics.GenericAPIView
+    ):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    lookup_field = 'pk'
+
+    def get(self, request, *args, **kwargs): # HTTP GET method
+        print(args, kwargs)
+        pk = kwargs.get('pk') # el lookup_field se encuentra en el kwargs
+        if pk is not None:
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
     def perform_create(self, serializer): # modificar la creacion
         # serializer.save(user=self.request.user)
@@ -18,51 +91,10 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
         title = serializer.validated_data.get('title')
         content = serializer.validated_data.get('content') or None
         if content is None:
-            content = title
+            content = "Single view doing cool stuff"
         serializer.save(content = content)
-        # send a django signal (revisar curso anterior)
 
-product_create_view = ProductListCreateAPIView.as_view()
-
-class ProductDetailAPIView(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    # lookup_filed = 'pk'
-
-product_detail_view = ProductDetailAPIView.as_view()
-
-class ProductUpdateAPIView(generics.UpdateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    lookup_filed = 'pk'
-
-    def perform_update(self, serializer):
-        instance = serializer.save()
-        if not instance.content:
-            instance.content = instance.title
-            ## 
-
-product_update_view = ProductUpdateAPIView.as_view()
-
-class ProductDeleteAPIView(generics.DestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    lookup_filed = 'pk'
-
-    def perform_destroy(self, instance):
-        # instance
-        super().perform_destroy(instance)
-
-product_delete_view = ProductDeleteAPIView.as_view()
-
-class ProductListAPIView(generics.ListAPIView):
-    """ 
-    Not gonna use this method
-    """
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-product_list_view = ProductListAPIView.as_view()
+product_mixin_view = ProductMixinView.as_view()
 
 # function based views
 @api_view(['GET', 'POST'])
